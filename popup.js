@@ -1,4 +1,3 @@
-const DEFAULT_URL = 'https://oms.emaldo.com/#/0/_/CXRqKjx2MzSAkdyucR9NDyPiiQR2vQcQ/devices/detail/zAguuHSbn7OcLvOc';
 const UPDATE_REPOSITORY = 'wuyao-11111/device-navigator';
 
 const deviceHeading = document.querySelector('#deviceHeading');
@@ -6,7 +5,7 @@ const deviceMeta = document.querySelector('#deviceMeta');
 const deviceDot = document.querySelector('#deviceDot');
 const copyIdButton = document.querySelector('#copyIdButton');
 const openAllButton = document.querySelector('#openAllButton');
-const readClipboardButton = document.querySelector('#readClipboardButton');
+const readCurrentPageButton = document.querySelector('#readCurrentPageButton');
 const quickButtons = [...document.querySelectorAll('.quick-action')];
 const footerMessage = document.querySelector('#footerMessage');
 const versionChip = document.querySelector('#versionChip');
@@ -94,11 +93,6 @@ function parseDevice(value) {
     return { id, base };
   }
 
-  // Also accept a raw id copied without its surrounding URL.
-  if (/^[A-Za-z0-9_-]{6,}$/.test(input)) {
-    return { id: input, base: `${DEFAULT_URL.split('/devices/detail/')[0]}${marker}${input}` };
-  }
-
   return null;
 }
 
@@ -117,7 +111,7 @@ function renderDevice(value, options = {}) {
   if (!parsed) {
     setState(value.trim() ? 'error' : 'idle');
     deviceHeading.textContent = '未识别';
-    deviceMeta.textContent = value.trim() ? '剪贴板内容不包含有效设备 ID' : '请先复制一个设备链接或设备 ID';
+    deviceMeta.textContent = value.trim() ? '当前页面不包含有效设备 ID' : '请在设备详情页打开插件';
     copyIdButton.disabled = true;
     openAllButton.disabled = true;
     quickButtons.forEach((button) => { button.disabled = true; });
@@ -127,26 +121,28 @@ function renderDevice(value, options = {}) {
 
   setState('ready');
   deviceHeading.textContent = parsed.id;
-  deviceMeta.textContent = '链接有效，可选择要打开的页面';
+  deviceMeta.textContent = '已从当前页面识别，可选择要打开的页面';
   copyIdButton.disabled = false;
   openAllButton.disabled = false;
   quickButtons.forEach((button) => { button.disabled = false; });
   if (options.message) footerMessage.textContent = options.message;
 }
 
-async function readClipboard() {
+async function readCurrentPage() {
   try {
-    const text = await navigator.clipboard.readText();
-    if (!text.trim()) {
-      renderDevice('', { message: '剪贴板为空' });
+    const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    const url = activeTab?.url || '';
+    if (!url) {
+      renderDevice('', { message: '无法读取当前页面地址' });
       return false;
     }
-    renderDevice(text, { message: '已从剪贴板读取' });
+    renderDevice(url, { message: '已从当前页面识别' });
+    if (!currentDevice) footerMessage.textContent = '当前页面不是设备详情页';
     return Boolean(currentDevice);
   } catch (error) {
     setState('error');
-    deviceMeta.textContent = '请允许插件读取剪贴板后重试';
-    footerMessage.textContent = '读取剪贴板失败';
+    deviceMeta.textContent = '请刷新页面后重新打开插件';
+    footerMessage.textContent = '读取当前页面失败';
     return false;
   }
 }
@@ -178,12 +174,12 @@ function openAllPages() {
   footerMessage.textContent = '已打开 3 个新标签页';
 }
 
-readClipboardButton.addEventListener('click', readClipboard);
+readCurrentPageButton.addEventListener('click', readCurrentPage);
 copyIdButton.addEventListener('click', copyDeviceId);
 openAllButton.addEventListener('click', openAllPages);
 quickButtons.forEach((button) => button.addEventListener('click', () => openPage(button.dataset.page)));
 updateButton.addEventListener('click', () => checkForUpdates({ manual: true }));
 
-renderDevice('', { message: '正在读取剪贴板...' });
-readClipboard();
+renderDevice('', { message: '正在读取当前页面...' });
+readCurrentPage();
 checkForUpdates();

@@ -16,7 +16,7 @@
             <h1>设备导航</h1>
           </div>
         </div>
-        <span class="version-chip" id="versionChip">v1.0.3</span>
+        <span class="version-chip" id="versionChip">v1.0.4</span>
       </header>
 
       <section class="device-panel" aria-labelledby="device-heading">
@@ -27,10 +27,9 @@
         <div class="device-id-row">
           <h2 id="deviceHeading">未识别</h2>
           <div class="device-id-actions">
-            <button class="icon-button subtle" id="readClipboardButton" type="button" title="重新读取剪贴板" aria-label="重新读取剪贴板">
+            <button class="icon-button subtle" id="readCurrentPageButton" type="button" title="重新读取当前页面" aria-label="重新读取当前页面">
               <svg viewBox="0 0 24 24" aria-hidden="true">
-                <rect x="8" y="3" width="8" height="4" rx="1" />
-                <path d="M16 5h2a2 2 0 0 1 2 2v13H4V7a2 2 0 0 1 2-2h2M8 11h8M8 15h5" />
+                <path d="M20 11a8 8 0 0 0-14.8-4.2L3 9M3 4v5h5M4 13a8 8 0 0 0 14.8 4.2L21 15M21 20v-5h-5" />
               </svg>
             </button>
             <button class="icon-button subtle" id="copyIdButton" type="button" title="复制设备 ID" aria-label="复制设备 ID" disabled>
@@ -41,7 +40,7 @@
             </button>
           </div>
         </div>
-        <p class="device-meta" id="deviceMeta">先读取一个包含 /devices/detail/ 的链接</p>
+        <p class="device-meta" id="deviceMeta">请在设备详情页打开插件</p>
       </section>
 
       <section class="actions-panel" aria-labelledby="actions-heading">
