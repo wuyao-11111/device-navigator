@@ -34,12 +34,16 @@ jobs:
           zip -qr "dist/emaldo-device-navigator-${RELEASE_TAG}.zip" . \
             -x ".git/*" ".github/*" "dist/*" ".DS_Store"
 
-      - name: Create GitHub Release
+      - name: Create or update GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ github.ref_name }}
         run: |
-          gh release create "$RELEASE_TAG" \
-            "dist/emaldo-device-navigator-${RELEASE_TAG}.zip" \
-            --generate-notes \
-            --title "Emaldo 设备导航 ${RELEASE_TAG}"
+          asset="dist/emaldo-device-navigator-${RELEASE_TAG}.zip"
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" "$asset" --clobber
+          else
+            gh release create "$RELEASE_TAG" "$asset" \
+              --generate-notes \
+              --title "设备导航 ${RELEASE_TAG}"
+          fi
