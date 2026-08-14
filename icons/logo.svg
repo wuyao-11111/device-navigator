@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">设备导航</title>
+  <path fill="#142f35" d="M28 8h72c11 0 20 9 20 20v65c0 15-12 27-27 27H28c-11 0-20-9-20-20V28C8 17 17 8 28 8Z" />
+  <path fill="#0f887f" d="M28 8h29L8 57V28C8 17 17 8 28 8Z" />
+  <path fill="none" stroke="#f7fbfa" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" d="M34 88c0-31 17-47 50-47h7" />
+  <path fill="none" stroke="#f7fbfa" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" d="m76 25 16 16-16 16" />
+  <circle cx="34" cy="88" r="10" fill="#e8785f" />
+  <circle cx="34" cy="88" r="3.5" fill="#142f35" />
+</svg>
