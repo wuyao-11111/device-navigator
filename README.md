@@ -1,0 +1,37 @@
+# Emaldo 设备导航
+
+一个无需构建步骤的 Chrome Manifest V3 插件。它支持：
+
+- 读取剪贴板中的 OMS 设备链接，并识别 `/devices/detail/` 后的设备 ID
+- 在新标签页打开首页、设备信息、状态和 Mode Insights
+- 一次性打开全部 4 个页面
+- 一键复制设备 ID
+- 直接粘贴裸设备 ID（不含完整链接）
+- 每次打开弹窗时检查 GitHub Release 是否有更高版本
+
+## 安装
+
+1. 打开 Chrome 的 `chrome://extensions/`。
+2. 开启右上角的“开发者模式”。
+3. 点击“加载已解压的扩展程序”，选择本目录 `emaldo-device-navigator`。
+4. 固定扩展后，点击工具栏中的 Emaldo 图标即可使用。
+
+扩展只声明了读取/写入剪贴板、创建标签页，以及 `oms.emaldo.com` 的主机权限。Mode Insights 按你提供的地址，当前与状态页共用 `/stats` 路由。
+
+## GitHub 发布与自动更新
+
+本目录已经包含 GitHub Actions 发布流程：`.github/workflows/release.yml`。把本目录作为 GitHub 仓库根目录后，修改 `manifest.json` 的版本号并推送同名标签即可自动生成 Release 压缩包，例如：
+
+```text
+manifest.json: 1.0.1
+git tag v1.0.1
+git push origin v1.0.1
+```
+
+需要注意 Chrome 的更新限制：
+
+- 通过“加载已解压的扩展程序”安装时，Chrome 不会从 GitHub 自动更新；代码变化后需要在扩展管理页点击“重新加载”。
+- GitHub Release 可以自动打包和分发，但普通个人 Chrome 不能把 GitHub 当作扩展的自动更新源。
+- 弹窗会在每次打开时查询 GitHub Release；发现新版本时显示更新入口，但安装仍需按 Chrome 的扩展更新流程完成。
+- 想让用户自动收到更新，应将扩展发布到 Chrome Web Store（可以设置为“未公开”）。发布新版本后，Chrome 会按自己的检查周期自动更新。
+- 企业托管环境可以使用 Chrome 的策略安装自托管 CRX，但这需要企业管理员配置，不适合作为个人安装方案。

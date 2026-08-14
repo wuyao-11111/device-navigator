@@ -1,0 +1,45 @@
+name: Package extension release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Verify tag and manifest versions
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          tag_version="${RELEASE_TAG#v}"
+          manifest_version="$(node -p "require('./manifest.json').version")"
+          test "$tag_version" = "$manifest_version" || {
+            echo "Tag $tag_version does not match manifest version $manifest_version"
+            exit 1
+          }
+
+      - name: Build zip package
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          mkdir -p dist
+          zip -qr "dist/emaldo-device-navigator-${RELEASE_TAG}.zip" . \
+            -x ".git/*" ".github/*" "dist/*" ".DS_Store"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$RELEASE_TAG" \
+            "dist/emaldo-device-navigator-${RELEASE_TAG}.zip" \
+            --generate-notes \
+            --title "Emaldo 设备导航 ${RELEASE_TAG}"

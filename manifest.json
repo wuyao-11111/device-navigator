@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "Emaldo 设备导航",
+  "version": "1.0.0",
+  "description": "从剪贴板快速打开 Emaldo 设备页面并复制设备 ID。",
+  "permissions": ["clipboardRead", "clipboardWrite", "tabs"],
+  "action": {
+    "default_title": "Emaldo 设备导航",
+    "default_popup": "popup.html"
+  },
+  "host_permissions": ["https://oms.emaldo.com/*", "https://api.github.com/*"]
+}
