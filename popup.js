@@ -1,5 +1,5 @@
 const DEFAULT_URL = 'https://oms.emaldo.com/#/0/_/CXRqKjx2MzSAkdyucR9NDyPiiQR2vQcQ/devices/detail/zAguuHSbn7OcLvOc';
-const UPDATE_REPOSITORY = 'wuyao-11111/emaldo-device-navigator';
+const UPDATE_REPOSITORY = 'wuyao-11111/device-navigator';
 
 const sourceInput = document.querySelector('#sourceInput');
 const sourceState = document.querySelector('#sourceState');
