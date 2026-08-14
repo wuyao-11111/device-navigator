@@ -13,6 +13,7 @@ const readClipboardButton = document.querySelector('#readClipboardButton');
 const quickButtons = [...document.querySelectorAll('.quick-action')];
 const footerMessage = document.querySelector('#footerMessage');
 const versionChip = document.querySelector('#versionChip');
+const updateButton = document.querySelector('#updateButton');
 const updateLink = document.querySelector('#updateLink');
 
 let currentDevice = null;
@@ -29,26 +30,45 @@ function compareVersions(left, right) {
   return 0;
 }
 
-async function checkForUpdates() {
+async function checkForUpdates({ manual = false } = {}) {
   const currentVersion = chrome.runtime.getManifest().version;
   versionChip.textContent = `v${currentVersion}`;
   updateLink.hidden = true;
-  if (!UPDATE_REPOSITORY) return;
+  if (!UPDATE_REPOSITORY) {
+    if (manual) footerMessage.textContent = '未配置更新源';
+    return false;
+  }
+
+  if (manual) {
+    updateButton.disabled = true;
+    updateButton.classList.add('checking');
+    footerMessage.textContent = '正在检查更新...';
+  }
 
   try {
     const response = await fetch(`https://api.github.com/repos/${UPDATE_REPOSITORY}/releases/latest`, {
       headers: { Accept: 'application/vnd.github+json' }
     });
-    if (!response.ok) return;
+    if (!response.ok) throw new Error(`GitHub API ${response.status}`);
     const release = await response.json();
     const latestVersion = String(release.tag_name || '').replace(/^v/, '');
-    if (!latestVersion || compareVersions(latestVersion, currentVersion) <= 0) return;
+    if (!latestVersion || compareVersions(latestVersion, currentVersion) <= 0) {
+      if (manual) footerMessage.textContent = '已是最新版本';
+      return false;
+    }
     updateLink.href = release.html_url || `https://github.com/${UPDATE_REPOSITORY}/releases/latest`;
     updateLink.textContent = `更新到 v${latestVersion}`;
     updateLink.hidden = false;
     footerMessage.textContent = '发现新版本';
+    return true;
   } catch (error) {
-    // A failed network check should never block the device shortcuts.
+    if (manual) footerMessage.textContent = '检查更新失败，请稍后重试';
+    return false;
+  } finally {
+    if (manual) {
+      updateButton.disabled = false;
+      updateButton.classList.remove('checking');
+    }
   }
 }
 
@@ -180,6 +200,7 @@ readClipboardButton.addEventListener('click', readClipboard);
 copyIdButton.addEventListener('click', copyDeviceId);
 openAllButton.addEventListener('click', openAllFromClipboardIfNeeded);
 quickButtons.forEach((button) => button.addEventListener('click', () => openPage(button.dataset.page)));
+updateButton.addEventListener('click', () => checkForUpdates({ manual: true }));
 sourceInput.addEventListener('input', () => {
   renderDevice(sourceInput.value);
   sourceHint.textContent = '输入会即时解析；也可以点击右侧按钮读取剪贴板。';
