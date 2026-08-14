@@ -16,7 +16,7 @@
             <h1>设备导航</h1>
           </div>
         </div>
-        <span class="version-chip" id="versionChip">v1.0.4</span>
+        <span class="version-chip" id="versionChip">v1.0.5</span>
       </header>
 
       <section class="device-panel" aria-labelledby="device-heading">
@@ -49,7 +49,14 @@
             <p class="section-kicker">OPEN IN NEW TABS</p>
             <h2 id="actions-heading">快捷入口</h2>
           </div>
+          <button class="icon-button subtle" id="readClipboardButton" type="button" title="重新读取剪贴板" aria-label="重新读取剪贴板">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="8" y="3" width="8" height="4" rx="1" />
+              <path d="M16 5h2a2 2 0 0 1 2 2v13H4V7a2 2 0 0 1 2-2h2M8 11h8M8 15h5" />
+            </svg>
+          </button>
         </div>
+        <p class="shortcut-source" id="shortcutSource" data-state="idle">正在读取剪贴板...</p>
         <button class="primary-action" id="openAllButton" type="button" disabled>
           <span class="action-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24"><rect x="3" y="4" width="8" height="7" rx="1" /><rect x="13" y="4" width="8" height="7" rx="1" /><rect x="3" y="13" width="8" height="7" rx="1" /><rect x="13" y="13" width="8" height="7" rx="1" /></svg>

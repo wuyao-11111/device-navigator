@@ -1,15 +1,15 @@
 {
   "manifest_version": 3,
   "name": "设备导航",
-  "version": "1.0.4",
-  "description": "从当前页面识别设备 ID，并快速打开相关设备页面。",
+  "version": "1.0.5",
+  "description": "从当前页面复制设备 ID，并用剪贴板设备 ID 快速打开相关页面。",
   "icons": {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  "permissions": ["activeTab", "clipboardWrite"],
+  "permissions": ["activeTab", "clipboardRead", "clipboardWrite"],
   "action": {
     "default_title": "设备导航",
     "default_popup": "popup.html",

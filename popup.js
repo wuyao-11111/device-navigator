@@ -1,3 +1,4 @@
+const DEFAULT_DEVICE_ROOT = 'https://oms.emaldo.com/#/0/_/CXRqKjx2MzSAkdyucR9NDyPiiQR2vQcQ/devices';
 const UPDATE_REPOSITORY = 'wuyao-11111/device-navigator';
 
 const deviceHeading = document.querySelector('#deviceHeading');
@@ -6,13 +7,17 @@ const deviceDot = document.querySelector('#deviceDot');
 const copyIdButton = document.querySelector('#copyIdButton');
 const openAllButton = document.querySelector('#openAllButton');
 const readCurrentPageButton = document.querySelector('#readCurrentPageButton');
+const readClipboardButton = document.querySelector('#readClipboardButton');
 const quickButtons = [...document.querySelectorAll('.quick-action')];
+const shortcutSource = document.querySelector('#shortcutSource');
 const footerMessage = document.querySelector('#footerMessage');
 const versionChip = document.querySelector('#versionChip');
 const updateButton = document.querySelector('#updateButton');
 const updateLink = document.querySelector('#updateLink');
 
-let currentDevice = null;
+let currentPageDevice = null;
+let shortcutDevice = null;
+let deviceRoot = DEFAULT_DEVICE_ROOT;
 
 function compareVersions(left, right) {
   const leftParts = left.split('.').map((part) => Number.parseInt(part, 10) || 0);
@@ -76,7 +81,7 @@ function normalizeInput(value) {
   return value.trim().replace(/[\u0000-\u001f]/g, '');
 }
 
-function parseDevice(value) {
+function parseDevice(value, { allowRaw = false } = {}) {
   const input = normalizeInput(value);
   if (!input) return null;
 
@@ -93,7 +98,19 @@ function parseDevice(value) {
     return { id, base };
   }
 
+  if (allowRaw && /^[A-Za-z0-9_-]{6,}$/.test(input)) {
+    return { id: input, base: `${deviceRoot}/detail/${input}` };
+  }
+
   return null;
+}
+
+function updateDeviceRoot(url) {
+  const marker = '/devices';
+  const markerIndex = url.indexOf(marker);
+  if (markerIndex < 0) return;
+  const candidate = url.slice(0, markerIndex + marker.length);
+  if (/^https?:\/\/[^/]+\/#\S+$/.test(candidate)) deviceRoot = candidate;
 }
 
 function buildPages(device) {
@@ -104,53 +121,74 @@ function buildPages(device) {
   };
 }
 
-function renderDevice(value, options = {}) {
+function renderCurrentPageDevice(value) {
   const parsed = parseDevice(value);
-  currentDevice = parsed;
+  currentPageDevice = parsed;
 
   if (!parsed) {
     setState(value.trim() ? 'error' : 'idle');
     deviceHeading.textContent = '未识别';
     deviceMeta.textContent = value.trim() ? '当前页面不包含有效设备 ID' : '请在设备详情页打开插件';
     copyIdButton.disabled = true;
-    openAllButton.disabled = true;
-    quickButtons.forEach((button) => { button.disabled = true; });
-    if (options.message) footerMessage.textContent = options.message;
     return;
   }
 
   setState('ready');
   deviceHeading.textContent = parsed.id;
-  deviceMeta.textContent = '已从当前页面识别，可选择要打开的页面';
+  deviceMeta.textContent = '已从当前页面识别，可复制设备 ID';
   copyIdButton.disabled = false;
-  openAllButton.disabled = false;
-  quickButtons.forEach((button) => { button.disabled = false; });
-  if (options.message) footerMessage.textContent = options.message;
 }
 
-async function readCurrentPage() {
+function renderShortcutDevice(value) {
+  shortcutDevice = parseDevice(value, { allowRaw: true });
+  const ready = Boolean(shortcutDevice);
+  openAllButton.disabled = !ready;
+  quickButtons.forEach((button) => { button.disabled = !ready; });
+  shortcutSource.dataset.state = ready ? 'ready' : 'idle';
+  shortcutSource.textContent = ready
+    ? `剪贴板设备 ID：${shortcutDevice.id}`
+    : '剪贴板中没有有效设备 ID';
+}
+
+async function readCurrentPage({ announce = true } = {}) {
   try {
     const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
     const url = activeTab?.url || '';
     if (!url) {
-      renderDevice('', { message: '无法读取当前页面地址' });
+      renderCurrentPageDevice('');
+      if (announce) footerMessage.textContent = '无法读取当前页面地址';
       return false;
     }
-    renderDevice(url, { message: '已从当前页面识别' });
-    if (!currentDevice) footerMessage.textContent = '当前页面不是设备详情页';
-    return Boolean(currentDevice);
+    updateDeviceRoot(url);
+    renderCurrentPageDevice(url);
+    if (announce) footerMessage.textContent = currentPageDevice ? '已从当前页面识别' : '当前页面不是设备详情页';
+    return Boolean(currentPageDevice);
   } catch (error) {
     setState('error');
     deviceMeta.textContent = '请刷新页面后重新打开插件';
-    footerMessage.textContent = '读取当前页面失败';
+    if (announce) footerMessage.textContent = '读取当前页面失败';
+    return false;
+  }
+}
+
+async function readClipboardDevice({ announce = true } = {}) {
+  try {
+    const text = await navigator.clipboard.readText();
+    renderShortcutDevice(text);
+    if (announce) footerMessage.textContent = shortcutDevice ? '快捷入口已读取剪贴板' : '剪贴板中没有有效设备 ID';
+    return Boolean(shortcutDevice);
+  } catch (error) {
+    renderShortcutDevice('');
+    shortcutSource.textContent = '无法读取剪贴板，请检查权限';
+    if (announce) footerMessage.textContent = '读取剪贴板失败';
     return false;
   }
 }
 
 async function copyDeviceId() {
-  if (!currentDevice) return;
+  if (!currentPageDevice) return;
   try {
-    await navigator.clipboard.writeText(currentDevice.id);
+    await navigator.clipboard.writeText(currentPageDevice.id);
     footerMessage.textContent = '设备 ID 已复制';
     copyIdButton.classList.add('copied');
     window.setTimeout(() => copyIdButton.classList.remove('copied'), 900);
@@ -160,26 +198,34 @@ async function copyDeviceId() {
 }
 
 function openPage(page) {
-  if (!currentDevice) return;
-  const url = buildPages(currentDevice)[page];
+  if (!shortcutDevice) return;
+  const url = buildPages(shortcutDevice)[page];
   chrome.tabs.create({ url });
   const labels = { home: '首页', info: '设备信息', stats: '状态' };
   footerMessage.textContent = `已在新标签页打开${labels[page]}`;
 }
 
 function openAllPages() {
-  if (!currentDevice) return;
-  const pages = buildPages(currentDevice);
+  if (!shortcutDevice) return;
+  const pages = buildPages(shortcutDevice);
   Object.values(pages).forEach((url) => chrome.tabs.create({ url }));
   footerMessage.textContent = '已打开 3 个新标签页';
 }
 
 readCurrentPageButton.addEventListener('click', readCurrentPage);
+readClipboardButton.addEventListener('click', readClipboardDevice);
 copyIdButton.addEventListener('click', copyDeviceId);
 openAllButton.addEventListener('click', openAllPages);
 quickButtons.forEach((button) => button.addEventListener('click', () => openPage(button.dataset.page)));
 updateButton.addEventListener('click', () => checkForUpdates({ manual: true }));
 
-renderDevice('', { message: '正在读取当前页面...' });
-readCurrentPage();
+renderCurrentPageDevice('');
+renderShortcutDevice('');
+(async () => {
+  const pageReady = await readCurrentPage({ announce: false });
+  const clipboardReady = await readClipboardDevice({ announce: false });
+  if (clipboardReady) footerMessage.textContent = '快捷入口已读取剪贴板';
+  else if (pageReady) footerMessage.textContent = '已识别当前页面设备 ID';
+  else footerMessage.textContent = '未找到可用设备 ID';
+})();
 checkForUpdates();
