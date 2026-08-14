@@ -7,7 +7,6 @@ const deviceDot = document.querySelector('#deviceDot');
 const copyIdButton = document.querySelector('#copyIdButton');
 const openAllButton = document.querySelector('#openAllButton');
 const readCurrentPageButton = document.querySelector('#readCurrentPageButton');
-const readClipboardButton = document.querySelector('#readClipboardButton');
 const quickButtons = [...document.querySelectorAll('.quick-action')];
 const shortcutSource = document.querySelector('#shortcutSource');
 const footerMessage = document.querySelector('#footerMessage');
@@ -213,7 +212,6 @@ function openAllPages() {
 }
 
 readCurrentPageButton.addEventListener('click', readCurrentPage);
-readClipboardButton.addEventListener('click', readClipboardDevice);
 copyIdButton.addEventListener('click', copyDeviceId);
 openAllButton.addEventListener('click', openAllPages);
 quickButtons.forEach((button) => button.addEventListener('click', () => openPage(button.dataset.page)));
@@ -228,4 +226,7 @@ renderShortcutDevice('');
   else if (pageReady) footerMessage.textContent = '已识别当前页面设备 ID';
   else footerMessage.textContent = '未找到可用设备 ID';
 })();
+window.setInterval(() => {
+  if (document.visibilityState === 'visible') readClipboardDevice({ announce: false });
+}, 1000);
 checkForUpdates();
