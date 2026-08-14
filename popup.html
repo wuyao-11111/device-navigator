@@ -21,29 +21,8 @@
             <h1>设备导航</h1>
           </div>
         </div>
-        <span class="version-chip" id="versionChip">v1.0.0</span>
+        <span class="version-chip" id="versionChip">v1.0.2</span>
       </header>
-
-      <section class="source-panel" aria-labelledby="source-heading">
-        <div class="section-heading">
-          <div>
-            <p class="section-kicker">SOURCE</p>
-            <h2 id="source-heading">识别设备链接</h2>
-          </div>
-          <span class="source-state" id="sourceState" data-state="idle">等待输入</span>
-        </div>
-        <div class="input-row">
-          <label class="sr-only" for="sourceInput">设备链接或设备 ID</label>
-          <input id="sourceInput" type="text" spellcheck="false" autocomplete="off" placeholder="粘贴 OMS 链接或设备 ID" />
-          <button class="icon-button" id="readClipboardButton" type="button" title="读取剪贴板" aria-label="读取剪贴板">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <rect x="8" y="3" width="8" height="4" rx="1" />
-              <path d="M16 5h2a2 2 0 0 1 2 2v13H4V7a2 2 0 0 1 2-2h2M8 11h8M8 15h5" />
-            </svg>
-          </button>
-        </div>
-        <p class="source-hint" id="sourceHint">点击右侧按钮读取一次剪贴板，也可以直接粘贴到输入框。</p>
-      </section>
 
       <section class="device-panel" aria-labelledby="device-heading">
         <div class="device-label">
@@ -52,12 +31,20 @@
         </div>
         <div class="device-id-row">
           <h2 id="deviceHeading">未识别</h2>
-          <button class="icon-button subtle" id="copyIdButton" type="button" title="复制设备 ID" aria-label="复制设备 ID" disabled>
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <rect x="9" y="9" width="10" height="10" rx="1.5" />
-              <path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1M13 13h2M13 16h4" />
-            </svg>
-          </button>
+          <div class="device-id-actions">
+            <button class="icon-button subtle" id="readClipboardButton" type="button" title="重新读取剪贴板" aria-label="重新读取剪贴板">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="8" y="3" width="8" height="4" rx="1" />
+                <path d="M16 5h2a2 2 0 0 1 2 2v13H4V7a2 2 0 0 1 2-2h2M8 11h8M8 15h5" />
+              </svg>
+            </button>
+            <button class="icon-button subtle" id="copyIdButton" type="button" title="复制设备 ID" aria-label="复制设备 ID" disabled>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="9" y="9" width="10" height="10" rx="1.5" />
+                <path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1M13 13h2M13 16h4" />
+              </svg>
+            </button>
+          </div>
         </div>
         <p class="device-meta" id="deviceMeta">先读取一个包含 /devices/detail/ 的链接</p>
       </section>
@@ -73,7 +60,7 @@
           <span class="action-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24"><rect x="3" y="4" width="8" height="7" rx="1" /><rect x="13" y="4" width="8" height="7" rx="1" /><rect x="3" y="13" width="8" height="7" rx="1" /><rect x="13" y="13" width="8" height="7" rx="1" /></svg>
           </span>
-          <span class="action-copy"><strong>全部打开</strong><small>首页、信息、状态、洞察</small></span>
+          <span class="action-copy"><strong>全部打开</strong><small>首页、设备信息、状态</small></span>
           <svg class="arrow-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
         </button>
         <div class="quick-grid">
@@ -88,10 +75,6 @@
           <button class="quick-action" data-page="stats" type="button" disabled>
             <span class="quick-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16" /><path d="m7 15 3-4 3 2 5-7" /></svg></span>
             <span>状态</span>
-          </button>
-          <button class="quick-action" data-page="insights" type="button" disabled>
-            <span class="quick-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3a7 7 0 0 0-4 12.7V19h8v-3.3A7 7 0 0 0 12 3Z" /><path d="M9 22h6M9 17h6M12 7v5M9.8 9.2 12 11.4l2.2-2.2" /></svg></span>
-            <span>Mode Insights</span>
           </button>
         </div>
       </section>
